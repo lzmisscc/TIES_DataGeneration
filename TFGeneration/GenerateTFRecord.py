@@ -194,6 +194,7 @@ class GenerateTFRecord:
                             f.write(html_content)
                             f.close()
                             im.save(os.path.join(dirname,'img',str(rc_count)+output_file_name.replace('.tfrecord','.png')), dpi=(600, 600))
+                            print(os.path.join(dirname,'img',str(rc_count)+output_file_name.replace('.tfrecord','.png')))
 
                         # driver.quit()
                         # 0/0
@@ -260,7 +261,7 @@ class GenerateTFRecord:
         #driver=PhantomJS()
         driver = Firefox(options=opts)
 
-        while(True):
+        if True:
             starttime = time.time()
 
             # randomly select a name of length=20 for tfrecords file.
@@ -268,41 +269,41 @@ class GenerateTFRecord:
             print('\nThread: ',threadnum,' Started:', output_file_name)
 
             # data_arr contains the images of generated tables and all_table_categories contains the table category of each of the table
-            flag = 1
-            while flag:
-                try:
-                    data_arr,all_table_categories = self.generate_tables(driver, filesize, output_file_name)
-                    flag = 0
-                except:
-                    flag = 1
+            # flag = 1
+            # while flag:
+            #     try:
+            #         data_arr,all_table_categories = self.generate_tables(driver, filesize, output_file_name)
+            #         flag = 0
+            #     except:
+            #         flag = 1
+            data_arr,all_table_categories = self.generate_tables(driver, filesize, output_file_name)
 
-                    
             if(data_arr is not None):
                 if(len(data_arr)==filesize):
                     with tf.io.TFRecordWriter(os.path.join(self.outtfpath,output_file_name),options=options) as writer:
-                        try:
-                            for imgindex,subarr in enumerate(data_arr):
-                                arr=subarr[0]
+                        for imgindex,subarr in enumerate(data_arr):
+                            arr=subarr[0]
 
-                                img=np.asarray(subarr[1][0],np.int64)[:,:,0]
-                                colmatrix = np.array(arr[1],dtype=np.int64)
-                                cellmatrix = np.array(arr[2],dtype=np.int64)
-                                rowmatrix = np.array(arr[0],dtype=np.int64)
-                                bboxes = np.array(arr[3])
-                                tablecategory=arr[4][0]
-                                seq_ex = self.generate_tf_record(img, cellmatrix, rowmatrix, colmatrix, bboxes,tablecategory,imgindex,output_file_name)
-                                writer.write(seq_ex.SerializeToString())
-                            print('\nThread :',threadnum,' Completed in ',time.time()-starttime,' ' ,output_file_name,'with len:',(len(data_arr)))
-                            print('category 1: ',all_table_categories[0],', category 2: ',all_table_categories[1],', category 3: ',all_table_categories[2],', category 4: ',all_table_categories[3])
-                        except Exception as e:
-                            print('Exception occurred in write_tf function for file: ',output_file_name)
-                            traceback.print_exc()
-                            self.logger.write(traceback.format_exc())
+                            img=np.asarray(subarr[1][0],np.int64)[:,:,0]
+                            colmatrix = np.array(arr[1],dtype=np.int64)
+                            cellmatrix = np.array(arr[2],dtype=np.int64)
+                            rowmatrix = np.array(arr[0],dtype=np.int64)
+                            bboxes = np.array(arr[3])
+                            tablecategory=arr[4][0]
+                            seq_ex = self.generate_tf_record(img, cellmatrix, rowmatrix, colmatrix, bboxes,tablecategory,imgindex,output_file_name)
+                            writer.write(seq_ex.SerializeToString())
+                        print('\nThread :',threadnum,' Completed in ',time.time()-starttime,' ' ,output_file_name,'with len:',(len(data_arr)))
+                        print('category 1: ',all_table_categories[0],', category 2: ',all_table_categories[1],', category 3: ',all_table_categories[2],', category 4: ',all_table_categories[3])
+                        # except Exception as e:
+                        #     print('Exception occurred in write_tf function for file: ',output_file_name)
+                        #     traceback.print_exc()
+                        #     self.logger.write(traceback.format_exc())
                             # print('Thread :',threadnum,' Removing',output_file_name)
                             # os.remove(os.path.join(self.outtfpath,output_file_name))
 
         driver.stop_client()
         driver.quit()
+        exit()
 
 
     def write_to_tf(self,max_threads):

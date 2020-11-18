@@ -12,7 +12,7 @@ parser.add_argument('--imagespath',default='Table_Detection_Dataset/unlv/train/i
 parser.add_argument('--ocrpath',default='Table_Detection_Dataset/unlv/unlv_xml_ocr')
 parser.add_argument('--tablepath',default='Table_Detection_Dataset/unlv/unlv _xml_gt')
 
-parser.add_argument('--visualizeimgs',type=int,default=1)              #if 1, will store the images along with tfrecords
+parser.add_argument('--visualizeimgs',type=int,default=0)              #if 1, will store the images along with tfrecords
 parser.add_argument('--visualizebboxes',type=int,default=1)			#if 1, will store the bbox visualizations in visualizations folder
 args=parser.parse_args()
 
