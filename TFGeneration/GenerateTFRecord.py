@@ -155,7 +155,7 @@ class GenerateTFRecord:
                 cols = int(round(rc_arr[rc_count][1]))
             
                 exceptcount=0
-                while(True):
+                while(len(data_arr)!=N_imgs):
                     #This loop is to repeat and retry generating image if some an exception is encountered.
                     try:
                         #initialize table class
@@ -182,7 +182,7 @@ class GenerateTFRecord:
                             #If the image is transformed, then its categorycategory is 4
 
                             #transform image and bounding boxes of the words
-                            im, bboxes = Transform(im, bboxes, shearval, rotval, self.max_width, self.max_height)
+                            # im, bboxes = Transform(im, bboxes, shearval, rotval, self.max_width, self.max_height)
                             tablecategory=4
                                 
                                 
@@ -263,12 +263,20 @@ class GenerateTFRecord:
         while(True):
             starttime = time.time()
 
-            #randomly select a name of length=20 for tfrecords file.
+            # randomly select a name of length=20 for tfrecords file.
             output_file_name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=20)) + '.tfrecord'
             print('\nThread: ',threadnum,' Started:', output_file_name)
 
-            #data_arr contains the images of generated tables and all_table_categories contains the table category of each of the table
-            data_arr,all_table_categories = self.generate_tables(driver, filesize, output_file_name)
+            # data_arr contains the images of generated tables and all_table_categories contains the table category of each of the table
+            flag = 1
+            while flag:
+                try:
+                    data_arr,all_table_categories = self.generate_tables(driver, filesize, output_file_name)
+                    flag = 0
+                except:
+                    flag = 1
+
+                    
             if(data_arr is not None):
                 if(len(data_arr)==filesize):
                     with tf.io.TFRecordWriter(os.path.join(self.outtfpath,output_file_name),options=options) as writer:
@@ -323,12 +331,13 @@ class GenerateTFRecord:
         self.create_dir(self.outtfpath)                 #create output directory if it does not exist
 
         starttime=time.time()
-        threads=[]
-        for threadnum in range(max_threads):
-            proc = Process(target=self.write_tf, args=(self.filesize, threadnum,))
-            proc.start()
-            threads.append(proc)
+        # threads=[]
+        # for threadnum in range(max_threads):
+        #     proc = Process(target=self.write_tf, args=(self.filesize, threadnum,))
+        #     proc.start()
+        #     threads.append(proc)
 
-        for proc in threads:
-            proc.join()
+        # for proc in threads:
+        #     proc.join()
+        self.write_tf(self.filesize, threadnum=1)
         print(time.time()-starttime)

@@ -2,7 +2,8 @@ import random
 import numpy as np
 from TableGeneration.Distribution import Distribution
 import time
-
+import logging
+logging.basicConfig(level=logging.INFO)
 '''
 The code for generating 4 categories of tables consists of several small pieces e.g. types of borders, 
 irregular/regular headers and transformations.
