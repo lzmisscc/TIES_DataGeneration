@@ -1,3 +1,4 @@
+from os import sep
 import random
 import numpy as np
 from TableGeneration.Distribution import Distribution
@@ -307,7 +308,7 @@ class Table:
                 if(subarr is not None):
                     single_col+=subarr
             all_cols.append(single_col)
-        print("all_cols\n", all_cols)
+        print("all_cols", *list(all_cols), sep='\n')
         return self.create_same_matrix(all_cols,self.idcounter)
 
     def create_same_row_matrix(self):
@@ -320,7 +321,7 @@ class Table:
                 if(subarr is not None):
                     single_row+=subarr
             all_rows.append(single_row)
-        print("all_rows\n", all_rows)
+        print("all_rows", *list(all_rows), sep='\n')
 
         return self.create_same_matrix(all_rows,self.idcounter)
 
@@ -332,7 +333,7 @@ class Table:
                 if(self.data_matrix[row,col] is not None):
                     all_cells.append(self.data_matrix[row,col])
 
-        print("all_cells\n", all_cells)
+        print("all_cells\n", all_cells,)
         return self.create_same_matrix(all_cells,self.idcounter)
 
     def select_table_category(self):
