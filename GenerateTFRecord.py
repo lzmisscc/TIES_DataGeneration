@@ -20,7 +20,6 @@ warnings.filterwarnings("ignore")
 Reader = jsonlines.open("pubtabnet/PubTabNet_2.0.0.jsonl", "r").iter()
 
 
-
 class Logger:
     def __init__(self):
         pass
@@ -52,7 +51,6 @@ class GenerateTFRecord:
         self.max_height = 768  # max image height
         self.max_width = 1366  # max image width
         self.visualizebboxes = visualizebboxes
-
 
     def create_dir(self, fpath):  # creates directory fpath if it does not exist
         if(not os.path.exists(fpath)):
@@ -130,13 +128,14 @@ class GenerateTFRecord:
 
         all_table_categories = [0, 0, 0, 0]
         data_arr = []
-        while len(data_arr)!=N_imgs:
+        while len(data_arr) != N_imgs:
             gt = Reader.__next__()
             try:
                 print(gt['filename'])
 
                 table = Table(gt=gt)
-                draw = Image.new(size=(self.max_width, self.max_height), mode='RGB', color=(255,255,255))
+                draw = Image.new(
+                    size=(self.max_width, self.max_height), mode='RGB', color=(255, 255, 255))
                 same_cell_matrix, same_col_matrix, same_row_matrix, id_count, html_content, tablecategory, im, bboxes = table.create()
                 W, H = im.size
                 if W > self.max_width or H > self.max_height:
@@ -144,9 +143,9 @@ class GenerateTFRecord:
             except Exception as E:
                 print("ERRO:", gt['filename'])
                 continue
-            draw.paste(im, [0,0]+list(im.size))
+            draw.paste(im, [0, 0]+list(im.size))
             data_arr.append([[same_row_matrix, same_col_matrix,
-                            same_cell_matrix, bboxes, [tablecategory]], [draw]])
+                              same_cell_matrix, bboxes, [tablecategory]], [draw]])
 
         return data_arr, all_table_categories
 
@@ -209,10 +208,13 @@ class GenerateTFRecord:
                             rowmatrix = np.array(arr[0], dtype=np.int64)
                             bboxes = np.array(arr[3])
                             tablecategory = arr[4][0]
-                            seq_ex = self.generate_tf_record(
-                                img, cellmatrix, rowmatrix, colmatrix, bboxes, tablecategory, imgindex, output_file_name)
-                            writer.write(seq_ex.SerializeToString())
-
+                            try:
+                                seq_ex = self.generate_tf_record(
+                                    img, cellmatrix, rowmatrix, colmatrix, bboxes, tablecategory, imgindex, output_file_name)
+                                writer.write(seq_ex.SerializeToString())
+                            except:
+                                print("保存失败")
+                                
 
     def write_to_tf(self, threadnum):
         '''This function starts tfrecords generation with number of threads = max_threads with each thread
@@ -230,20 +232,12 @@ class GenerateTFRecord:
         starttime = time.time()
         self.write_tf(self.filesize, threadnum=threadnum)
 
-        # nums = 5
-        # pools = []
-        # for i in range(nums):
-        #     p = Thread(target=self.write_tf, args=(self.filesize, i,))
-        #     pools.append(p)
-        #     p.start()
-        #     self.write_tf(self.filesize, threadnum=1)
-        # for p in pools:
-        #     p.join()
         print(time.time()-starttime)
 
 
 if __name__ == "__main__":
-    outpath,filesize,visualizebboxes = 'tfrecords/', 1000, 'bboxes'
-    t = GenerateTFRecord(outpath=outpath,filesize=filesize,visualizebboxes=visualizebboxes,)
-    for i in range(10):
+    outpath, filesize, visualizebboxes = 'tfrecords_2/', 100, 'bboxes'
+    t = GenerateTFRecord(outpath=outpath, filesize=filesize,
+                         visualizebboxes=visualizebboxes,)
+    for i in range(100):
         t.write_to_tf(i)
