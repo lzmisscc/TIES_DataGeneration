@@ -192,16 +192,16 @@ if __name__ == "__main__":
         print(gt['filename'])
 
 
-        if gt['filename'] != 'PMC2801862_002_00.png':
-            continue
+        # if gt['filename'] != 'PMC2801862_002_00.png':
+        #     continue
         try:
             p = MyTable(gt=gt)
         except:
             print('ERROR TABLE:', gt['filename'])
             continue
-        # try:
-        #     p.create()
-        # except:
-        #     print('ERROR CREATE:', gt['filename'])
-        #     continue
+        try:
+            p.create()
+        except:
+            print('ERROR CREATE:', gt['filename'])
+            continue
         # exit()

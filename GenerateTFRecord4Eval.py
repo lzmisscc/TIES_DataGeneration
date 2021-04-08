@@ -14,12 +14,24 @@ import tensorflow as tf
 import warnings
 import jsonlines
 import time
-
+import glob
 warnings.filterwarnings("ignore")
 
-split = 'val'
+# split = 'val'
 Reader = jsonlines.open("pubtabnet/PubTabNet_2.0.0.jsonl", "r").iter()
-Reader = iter([i for i in Reader if i['split'] == split])
+# Reader = iter([i for i in Reader if i['split'] == split])
+png = iter(glob.glob("cell_det/*.png")+glob.glob("cell_det/*.png"))
+
+
+def read_det_txt(txt):
+    with open(txt, "r") as f:
+        lines = f.readlines()
+    bboxes = []
+    for id, li in enumerate(lines):
+        li = [id]+['123']+list(map(int, li.strip('\n').split(',')))[:4]
+        bboxes.append(li)
+    return bboxes
+
 
 class Logger:
     def __init__(self):
@@ -144,6 +156,9 @@ class GenerateTFRecord:
             except Exception as E:
                 print("ERRO:", gt['filename'])
                 continue
+            na = png.__next__()
+            im = Image.open(na)
+            bboxes = read_det_txt(na.replace(".png", ".txt"))
             draw.paste(im, [0, 0]+list(im.size))
             data_arr.append([[same_row_matrix, same_col_matrix,
                               same_cell_matrix, bboxes, [tablecategory]], [draw]])
@@ -215,7 +230,6 @@ class GenerateTFRecord:
                                 writer.write(seq_ex.SerializeToString())
                             except:
                                 print("保存失败")
-                                
 
     def write_to_tf(self, threadnum):
         '''This function starts tfrecords generation with number of threads = max_threads with each thread
@@ -237,8 +251,11 @@ class GenerateTFRecord:
 
 
 if __name__ == "__main__":
-    outpath, filesize, visualizebboxes = 'val/', 100, ''
+    import os
+    l = len(os.listdir('cell_det')) // 2
+    print(l)
+    outpath, filesize, visualizebboxes = 'eval/', 1, ''
     t = GenerateTFRecord(outpath=outpath, filesize=filesize,
                          visualizebboxes=visualizebboxes,)
-    for i in range(100):
+    for i in range(l):
         t.write_to_tf(i)
